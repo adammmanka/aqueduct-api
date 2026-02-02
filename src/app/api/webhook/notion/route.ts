@@ -99,10 +99,14 @@ export async function POST(req: Request) {
 
     if (parsed?.verification_token) {
       // Notion subscription verification bootstrap.
-      // We log a redacted token so you can confirm receipt in Vercel logs.
+      // Store full token for one-time admin retrieval (avoid leaking full secret to logs).
       const tok = String(parsed.verification_token);
       const redacted = tok.length <= 12 ? tok : `${tok.slice(0, 8)}…${tok.slice(-4)}`;
       console.log(`[notion] verification_token received: ${redacted}`);
+
+      const { storeVerificationToken } = await import("@/lib/verificationToken");
+      await storeVerificationToken(tok);
+
       return Response.json({ verification_token: parsed.verification_token });
     }
   } catch {
