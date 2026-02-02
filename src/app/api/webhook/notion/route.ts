@@ -98,8 +98,11 @@ export async function POST(req: Request) {
     const parsed = JSON.parse(rawBody);
 
     if (parsed?.verification_token) {
-      // Optional signature validation for verification requests as well.
-      // But Notion’s docs treat this as the token bootstrap step.
+      // Notion subscription verification bootstrap.
+      // We log a redacted token so you can confirm receipt in Vercel logs.
+      const tok = String(parsed.verification_token);
+      const redacted = tok.length <= 12 ? tok : `${tok.slice(0, 8)}…${tok.slice(-4)}`;
+      console.log(`[notion] verification_token received: ${redacted}`);
       return Response.json({ verification_token: parsed.verification_token });
     }
   } catch {
